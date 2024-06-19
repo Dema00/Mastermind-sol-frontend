@@ -12,7 +12,7 @@ const ConnectButton: React.FC = () => {
       ) : (
         <span>Connected with {account}</span>
       )}
-      {error && <p>{error}</p>}
+      {error && <p style={{ color: 'red' }}>{error}</p>}
     </div>
   );
 };

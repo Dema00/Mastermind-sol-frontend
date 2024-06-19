@@ -1,3 +1,4 @@
+// src/hooks/useMetaMask.ts
 import { useEffect, useState } from 'react';
 import { ethers } from 'ethers';
 
@@ -10,8 +11,13 @@ const useMetaMask = () => {
       try {
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
         setAccount(accounts[0]);
+        setError(null); // Clear any previous errors
       } catch (err: any) {
-        setError(err.message);
+        if (err.code === -32002) {
+          setError('MetaMask is already processing a request. Please check your MetaMask extension.');
+        } else {
+          setError(err.message);
+        }
       }
     } else {
       setError('MetaMask is not installed');

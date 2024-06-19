@@ -1,7 +1,7 @@
 // src/hooks/useContract.ts
 import { useEffect, useState } from 'react';
-import { JsonRpcSigner, ethers } from 'ethers';
-const Mastermind = require('../abi/Mastermind.json');
+import { InterfaceAbi, JsonRpcSigner, ethers } from 'ethers';
+import Mastermind from '../abi/Mastermind.json';
 
 const useContract = (contractAddress: string) => {
   const [contract, setContract] = useState<ethers.Contract | null>(null);
@@ -16,14 +16,15 @@ const useContract = (contractAddress: string) => {
       const signer = provider.getSigner().then(
         (signer) => {
             setSigner(signer);
-            const contract = new ethers.Contract(contractAddress, Mastermind, signer);
+            console.log(Mastermind);
+            const contract = new ethers.Contract(contractAddress, Mastermind.abi, signer);
             setContract(contract);
         }
       );
     }
   }, [contractAddress]);
 
-  return { contract, provider, signer };
+  return { contract, provider, signer, };
 };
 
 export default useContract;
