@@ -16,7 +16,6 @@ const useContract = (contractAddress: string) => {
       const signer = provider.getSigner().then(
         (signer) => {
             setSigner(signer);
-            console.log(Mastermind);
             const contract = new ethers.Contract(contractAddress, Mastermind.abi, signer);
             setContract(contract);
         }

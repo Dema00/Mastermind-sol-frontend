@@ -4,6 +4,8 @@ import Mastermind from './abi/Mastermind.json';
 
 import ConnectButton from './components/connectButton';
 import CreateGame from './components/Mastermind/CreateGame';
+import JoinGame from './components/Mastermind/JoinGame';
+import ProposeStake from './components/Mastermind/proposeStake';
 
 
 const App: React.FC = () => {
@@ -12,6 +14,8 @@ const App: React.FC = () => {
       <h1>MetaMask Wallet Integration</h1>
       <ConnectButton />
       <CreateGame />
+      <JoinGame />
+      <ProposeStake />
     </div>
   );
 };

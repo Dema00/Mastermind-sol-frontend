@@ -13,7 +13,7 @@ const CreateGame: React.FC = () => {
   const [opponent, setOpponent] = useState<string>('');
   const [codeLength, setCodeLength] = useState<number>(4);
   const [codeSymbolsAmt, setCodeSymbolsAmt] = useState<number>(6);
-  const [bonus, setBonus] = useState<string>('0.1');
+  const [bonus, setBonus] = useState<string>('10');
 
   const handleCreateGame = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -23,7 +23,7 @@ const CreateGame: React.FC = () => {
           opponent,
           codeLength,
           codeSymbolsAmt,
-          ethers.parseEther(bonus)
+          bonus
         );
         const receipt = await tx.wait();
         console.log('Transaction successful:', receipt);
@@ -73,7 +73,7 @@ const CreateGame: React.FC = () => {
           />
         </div>
         <div>
-          <label>Bonus (in ETH):</label>
+          <label>Bonus:</label>
           <input 
             type="text" 
             value={bonus}
