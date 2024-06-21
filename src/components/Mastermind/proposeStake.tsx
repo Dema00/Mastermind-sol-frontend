@@ -3,10 +3,8 @@ import React, { useState } from 'react';
 import { ethers } from 'ethers';
 import useContract from '../../hooks/useContract';
 
-const MASTERMINDS_CONTRACT_ADDRESS = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
-
-const ProposeStake: React.FC = () => {
-  const { contract } = useContract(MASTERMINDS_CONTRACT_ADDRESS);
+const ProposeStake: React.FC<delegateCall> = ({address, callback}:delegateCall) => {
+  const { contract } = useContract(address);
   const [gameId, setGameId] = useState<string>('');
   const [stakeAmount, setStakeAmount] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
