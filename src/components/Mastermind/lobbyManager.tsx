@@ -7,7 +7,7 @@ import ProposeStake from "./proposeStake";
 
 type gameState = "stake" | "setcode" | "guess" | "feedback" | "reveal" | "dispute";
 
-const LobbyManager: React.FC<delegateCall> = ({address}:delegateCall) => {
+const LobbyManager: React.FC<delegateCall> = ({address,args}:delegateCall) => {
 
     const [inputField, setInputField] = useState<string>('');
     const [state, setState] = useState<gameState>("stake");
@@ -49,7 +49,7 @@ const LobbyManager: React.FC<delegateCall> = ({address}:delegateCall) => {
     return(
         <>
         <div>
-            <ProposeStake address={address} callback={()=>{}}/>
+            <ProposeStake address={address} callback={()=>{}} args={args}/>
         </div>
         </>
     )

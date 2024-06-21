@@ -1,22 +1,37 @@
 // src/components/MastermindComponent.tsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import useContract from '../hooks/useContract';
 import {ethers} from 'ethers';
 
 import LobbyManager from './Mastermind/lobbyManager';
+import { assert } from 'console';
+import { sign } from 'crypto';
 
 const MASTERMINDS_CONTRACT_ADDRESS = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
 
 const GameManager: React.FC = () => {
-  const { contract } = useContract(MASTERMINDS_CONTRACT_ADDRESS);
+  const { contract, signer } = useContract(MASTERMINDS_CONTRACT_ADDRESS);
   const [error, setError] = useState<string | null>(null);
   const [gameId, setGameId] = useState<string | null>(null);
+  const [role, setRole] = useState<string>('');
 
   const [joinGameId, setJoinGameId] = useState<string>('');
   const [opponent, setOpponent] = useState<string>('');
   const [codeLength, setCodeLength] = useState<number>(4);
   const [codeSymbolsAmt, setCodeSymbolsAmt] = useState<number>(6);
   const [bonus, setBonus] = useState<string>('10');
+
+  useLayoutEffect(() => {
+    let address: string;
+    signer?.getAddress().then((addr) => {
+      address = addr;
+    })
+    contract?.on('GameCreated', (_game_id: string, _game_creator: string) => {
+      if (_game_creator === address) {
+        setGameId(_game_id);
+      }
+    });
+  })
 
   const handleCreateGame = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -28,13 +43,9 @@ const GameManager: React.FC = () => {
           codeSymbolsAmt,
           bonus
         );
-        //const receipt = await tx.wait();
+        const receipt = await tx.wait();
 
-        // Listen for the GameCreated event
-        contract.on('GameCreated', (_game_id: string, _game_creator: string) => {
-          console.log('GameCreated event:', _game_id, _game_creator);
-          setGameId(_game_id);
-        });
+        setRole("creator");
 
       } catch (error: any) {
         setError('Error creating game: ' + error.message);
@@ -51,6 +62,8 @@ const GameManager: React.FC = () => {
           }
         const tx = await contract.joinGame(joinGameId);
         await tx.wait();
+
+        setRole("opponent");
         setGameId(joinGameId);
       } catch (error: any) {
         setError('Error joining game: ' + error.message);
@@ -122,7 +135,9 @@ const GameManager: React.FC = () => {
       {gameId && 
       <>
         <p>In game with ID: {gameId}</p>
-        <LobbyManager address={MASTERMINDS_CONTRACT_ADDRESS} callback={()=>{}}/>
+        <LobbyManager address={MASTERMINDS_CONTRACT_ADDRESS} callback={()=>{}} args={new Map<string,string>([
+          ["game_id", gameId], ["role", role]
+          ])}/>
       </>
       }
     </div>

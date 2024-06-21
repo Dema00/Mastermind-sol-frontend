@@ -4,6 +4,6 @@ interface Window {
 
 interface delegateCall {
   address: string;
-  callback: function;
+  callback: Function;
+  args: Map<string,string>;
 }
-  
