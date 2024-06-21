@@ -1,6 +1,5 @@
 // src/components/MastermindComponent.tsx
 import React, { useEffect, useLayoutEffect, useState } from 'react';
-import useContract from '../../hooks/useContract';
 import {ethers} from 'ethers';
 
 import ProposeStake from "./proposeStake";
@@ -8,8 +7,7 @@ import SetCodeHash from "./SetCodeHash";
 
 type gameState = "stake" | "setcode" | "guess" | "feedback" | "reveal" | "dispute";
 
-const GameManager: React.FC<delegateCall> = ({address,args}:delegateCall) => {
-    const { contract } = useContract(address);
+const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
     const [state, setState] = useState<gameState>("stake");
     const [gamePrize, setPrize] = useState<string | null>(null);
     const [c_fb_g, setCfb] = useState<boolean | null>(null);
@@ -19,12 +17,12 @@ const GameManager: React.FC<delegateCall> = ({address,args}:delegateCall) => {
             setCfb(c_fb);
             if (_game_id === args.get("game_id")) {
                 if (
-                    (args.get("role") == "creator" && c_fb == true) ||
-                    (args.get("role") == "opponent" && c_fb == false)
+                    (args.get("role") === "creator" && c_fb === true) ||
+                    (args.get("role") === "opponent" && c_fb === false)
                 ) {
-                    setState("setcode");
-                } else {
                     setState("guess");
+                } else {
+                    setState("setcode");
                 }
             }
           });
@@ -73,13 +71,13 @@ const GameManager: React.FC<delegateCall> = ({address,args}:delegateCall) => {
             }
             { state === "stake" &&
             <>
-                <ProposeStake address={address} callback={stakeCallback} args={args}/>
+                <ProposeStake contract={contract} callback={stakeCallback} args={args}/>
                 ${state}
             </>
             }
             { state === "setcode" &&
             <>
-                <SetCodeHash address={address} callback={stakeCallback} args={args}/>
+                <SetCodeHash contract={contract} callback={stakeCallback} args={args}/>
                 ${state}
             </>
             }

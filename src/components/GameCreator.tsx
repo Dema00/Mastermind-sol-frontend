@@ -1,7 +1,7 @@
 // src/components/MastermindComponent.tsx
 import React, { useEffect, useLayoutEffect, useState } from 'react';
 import useContract from '../hooks/useContract';
-import {ethers} from 'ethers';
+import {ContractTransactionResponse, ethers} from 'ethers';
 
 import GameManager from './Mastermind/GameManager';
 import { assert } from 'console';
@@ -48,7 +48,7 @@ const GameCreator: React.FC = () => {
     event.preventDefault();
     if (contract) {
       try {
-        const tx = await contract.createGame(
+        const tx: ContractTransactionResponse = await contract.createGame(
           opponent,
           codeLength,
           codeSymbolsAmt,
@@ -148,7 +148,7 @@ const GameCreator: React.FC = () => {
         <h3>You are the {role}</h3>
         <h4>In game with ID: {gameId}</h4>
         { codeLen && <h5>Code length: {codeLen} Colors amount: {codeSymAmt} Bonus: {bonus}</h5>}
-        <GameManager address={MASTERMINDS_CONTRACT_ADDRESS} callback={()=>{}} args={new Map<string,string>([
+        <GameManager contract={contract!} callback={()=>{}} args={new Map<string,string>([
           ["game_id", gameId], ["role", role], ["state", "stake"], ["code_len", codeLen], ["code_sym_amt", codeSymAmt], ["bonus", bonus]
           ])}/>
       </>

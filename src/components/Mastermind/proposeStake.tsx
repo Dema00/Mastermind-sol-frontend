@@ -1,10 +1,8 @@
 // src/components/ProposeStakeComponent.tsx
 import React, { useLayoutEffect, useState } from 'react';
 import { ethers } from 'ethers';
-import useContract from '../../hooks/useContract';
 
-const ProposeStake: React.FC<delegateCall> = ({address, callback, args}:delegateCall) => {
-  const { contract } = useContract(address);
+const ProposeStake: React.FC<delegateCall> = ({contract, callback, args}:delegateCall) => {
   const gameId = args.get("game_id");
   const [stakeAmount, setStakeAmount] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
@@ -39,20 +37,18 @@ const ProposeStake: React.FC<delegateCall> = ({address, callback, args}:delegate
 
   const handleProposeStake = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (contract) {
-      try {
-        // Ensure the input is a valid 32-byte hexadecimal string
-        if (!ethers.isHexString(gameId, 32)) {
-          throw new Error('Invalid bytes32 value for Game ID');
-        }
-
-        const stakeInWei = ethers.parseEther(stakeAmount);
-        const tx = await contract.proposeStake(gameId, { value: stakeInWei });
-        await tx.wait();
-      } catch (error: any) {
-        setError('Error proposing stake: ' + error.message);
-        setSuccess(null);
+    try {
+      // Ensure the input is a valid 32-byte hexadecimal string
+      if (!ethers.isHexString(gameId, 32)) {
+        throw new Error('Invalid bytes32 value for Game ID');
       }
+
+      const stakeInWei = ethers.parseEther(stakeAmount);
+      const tx = await contract.proposeStake(gameId, { value: stakeInWei });
+      await tx.wait();
+    } catch (error: any) {
+      setError('Error proposing stake: ' + error.message);
+      setSuccess(null);
     }
   };
 
