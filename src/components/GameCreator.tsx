@@ -3,13 +3,13 @@ import React, { useEffect, useLayoutEffect, useState } from 'react';
 import useContract from '../hooks/useContract';
 import {ethers} from 'ethers';
 
-import LobbyManager from './Mastermind/lobbyManager';
+import GameManager from './Mastermind/GameManager';
 import { assert } from 'console';
 import { sign } from 'crypto';
 
 const MASTERMINDS_CONTRACT_ADDRESS = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
 
-const GameManager: React.FC = () => {
+const GameCreator: React.FC = () => {
   const { contract, signer } = useContract(MASTERMINDS_CONTRACT_ADDRESS);
   const [error, setError] = useState<string | null>(null);
   const [gameId, setGameId] = useState<string | null>(null);
@@ -21,6 +21,9 @@ const GameManager: React.FC = () => {
   const [codeSymbolsAmt, setCodeSymbolsAmt] = useState<number>(6);
   const [bonus, setBonus] = useState<string>('10');
 
+  const [codeLen, setCodeLen] = useState<string | null>(null);
+  const [codeSymAmt, setSymAmt] = useState<string | null>(null);
+
   useLayoutEffect(() => {
     let address: string;
     signer?.getAddress().then((addr) => {
@@ -29,6 +32,14 @@ const GameManager: React.FC = () => {
     contract?.on('GameCreated', (_game_id: string, _game_creator: string) => {
       if (_game_creator === address) {
         setGameId(_game_id);
+      }
+    });
+
+    contract?.on('PlayersReady', (_game_id: string, _code_len: number, _code_symbols_amt: number, _bonus: number) => {
+      if (_game_id === gameId) {
+        setCodeLen(_code_len.toString());
+        setSymAmt(_code_symbols_amt.toString());
+        setBonus(_bonus.toString());
       }
     });
   })
@@ -132,16 +143,24 @@ const GameManager: React.FC = () => {
           </form>
       </>
       }
-      {gameId && 
+      {gameId && codeLen && codeSymAmt &&
       <>
-        <p>In game with ID: {gameId}</p>
-        <LobbyManager address={MASTERMINDS_CONTRACT_ADDRESS} callback={()=>{}} args={new Map<string,string>([
-          ["game_id", gameId], ["role", role]
+        <h3>You are the {role}</h3>
+        <h4>In game with ID: {gameId}</h4>
+        { codeLen && <h5>Code length: {codeLen} Colors amount: {codeSymAmt} Bonus: {bonus}</h5>}
+        <GameManager address={MASTERMINDS_CONTRACT_ADDRESS} callback={()=>{}} args={new Map<string,string>([
+          ["game_id", gameId], ["role", role], ["state", "stake"], ["code_len", codeLen], ["code_sym_amt", codeSymAmt], ["bonus", bonus]
           ])}/>
+      </>
+      }
+      {gameId && !codeLen && !codeSymAmt &&
+      <>
+        <h4>Room ID: {gameId}</h4>
+        <h4>Waiting for opponent...</h4>
       </>
       }
     </div>
   );
 };
 
-export default GameManager;
+export default GameCreator;

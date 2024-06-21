@@ -12,23 +12,25 @@ const ProposeStake: React.FC<delegateCall> = ({address, callback, args}:delegate
 
   useLayoutEffect( () => {
     contract?.on('StakeSent', (_game_id: string, stake: number) => {
-      if (gameId === args.get("game_id")) {
+      if (_game_id === args.get("game_id")) {
         setSuccess(`creator staked: ${stake}`);
         setError(null);
       }
     });
 
     contract?.on('StakeFailed', (_game_id: string, stake: number) => {
-      if (gameId === args.get("game_id")) {
+      if (_game_id === args.get("game_id")) {
         setError(`Stake failed, opponent sent: ${stake}`);
         setSuccess(null);
       }
     });
 
     contract?.on('StakeSuccessful', (_game_id: string, stake: number) => {
-      if (gameId === args.get("game_id")) {
+      if (_game_id === args.get("game_id")) {
         setSuccess(`Game prize pool: ${stake}`);
         setError(null);
+
+        callback(stake);
       }
     });
   }

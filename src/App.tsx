@@ -3,7 +3,7 @@ import { ethers } from 'ethers';
 import Mastermind from './abi/Mastermind.json';
 
 import ConnectButton from './components/connectButton';
-import GameManager from './components/GameManager';
+import GameCreator from './components/GameCreator';
 
 
 const App: React.FC = () => {
@@ -11,7 +11,7 @@ const App: React.FC = () => {
     <div>
       <h1>MetaMask Wallet Integration</h1>
       <ConnectButton />
-      <GameManager />
+      <GameCreator />
     </div>
   );
 };
