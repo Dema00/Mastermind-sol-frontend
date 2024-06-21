@@ -36,6 +36,8 @@ const SetCodeHash: React.FC<delegateCall> = ({callback, args, contract}:delegate
         } catch (error: any) {
           setError('Error joining game: ' + error.message);
         }
+
+        callback(_salt);
     };
 
     function generateRandom4ByteString(): string {

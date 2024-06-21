@@ -11,6 +11,7 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
     const [state, setState] = useState<gameState>("stake");
     const [gamePrize, setPrize] = useState<string | null>(null);
     const [c_fb_g, setCfb] = useState<boolean | null>(null);
+    const [salt, setSalt] = useState<string | null>(null);
 
     useLayoutEffect( () => {
         contract?.on('GameStart', (_game_id: string, c_fb: boolean) => {
@@ -33,8 +34,9 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
         setPrize(stake.toString());
     };
 
-    const setCodeCallback = () => {
-
+    const setCodeCallback = (salt: string) => {
+        setSalt(salt);
+        setState("feedback");
     };
 
     const guessCallback = () => {
@@ -77,13 +79,18 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
             }
             { state === "setcode" &&
             <>
-                <SetCodeHash contract={contract} callback={stakeCallback} args={args}/>
+                <SetCodeHash contract={contract} callback={setCodeCallback} args={args}/>
                 ${state}
             </>
             }
             { state === "guess" &&
             <> 
                 <div>GUESS</div>
+            </>
+            }
+            { state === "feedback" &&
+            <> 
+                <div>FEEDBACK {salt}</div>
             </>
             }
         </div>
