@@ -6,9 +6,10 @@ interface GuessEntry{
     guess: string,
     guess_len: number,
     feedback: string,
+    is_brk: boolean
 }
 
-const GuessEntry: React.FC<GuessEntry> = ({guess,guess_len, feedback, curr_guess}) => {
+const GuessEntry: React.FC<GuessEntry> = ({guess,guess_len, feedback, curr_guess, is_brk}) => {
   // State for the array of numbers
   const [numberArray, setNumberArray] = useState<number[]>([]);
   // State for the two individual numbers
@@ -68,8 +69,11 @@ const GuessEntry: React.FC<GuessEntry> = ({guess,guess_len, feedback, curr_guess
           <span style={{ marginLeft: '10px' }}>NC: {NC}</span>
         </label>
       </div>
-
-      <button onClick={handleButtonClick}>Dispute</button>
+    </>
+    }
+    { is_brk &&
+    <>
+        <button onClick={handleButtonClick}>Dispute</button>
     </>
     }
     </div>

@@ -20,10 +20,23 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
     const [currGuess, setCurrGuess] =  useState<number>(1);
 
     const youAreBreaker = () => {
-        const players = 
-        (c_fb_g) ? 
-        ["opponent", "creator"] : ["creator","opponent"];
-        return players[turn_num % 2] === args.get("role");
+        let turnNum = Number(turn_num);
+        if (isNaN(turnNum)) {
+            console.error('turn_num is not a valid number:', turn_num);
+            return false; // Handle error case as appropriate
+        }
+
+
+        const players = (c_fb_g) ? ["opponent", "creator"] : ["creator", "opponent"];
+        const playerIndex: number = turnNum % 2;
+        const currentRole = args.get("role");
+
+        console.log('turn_num:', turn_num, 'type:', typeof turn_num);
+        console.log('currentRole:', currentRole, 'type:', typeof currentRole);
+        console.log('currentStatus:', players[playerIndex], 'type:', typeof players[playerIndex]);
+        console.log('return', players[playerIndex] == currentRole, 'type:', typeof (players[playerIndex] == currentRole));
+
+        return (players[playerIndex] == currentRole);
     }
 
     function bytesToNumberArray(bytes: string, len: number): number[] {
@@ -39,7 +52,7 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
     }
 
     useLayoutEffect( () => {
-        contract?.on('GameStart', (_game_id: string, c_fb: boolean) => {
+        contract?.once('GameStart', (_game_id: string, c_fb: boolean) => {
             if (_game_id === args.get("game_id")) {
                 setCfb(c_fb);
                 if (
@@ -54,7 +67,7 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
             }
           });
 
-        contract?.on('SecretSet', (_game_id: string, turn_num: number) => {
+        contract?.once('SecretSet', (_game_id: string, turn_num: number) => {
             if (_game_id === args.get("game_id")) {
                 setTurnNum(turn_num);
                 if (youAreBreaker()) {
@@ -65,7 +78,7 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
             }
           });
 
-        contract?.on('GuessSent', (_game_id: string, _turn_num: number, _guess_num: number, _guess: string) => {
+        contract?.once('GuessSent', (_game_id: string, _turn_num: number, _guess_num: number, _guess: string) => {
             if (_game_id === args.get("game_id")) {
                 setCurrGuess(_guess_num);
                 console.log(_guess_num);
@@ -132,7 +145,7 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
                 }
                 <ul>
                 {guesses.map((entry, index) => (
-                    <><li key={index}><GuessEntry curr_guess={currGuess} guess={entry[0]} guess_len={Number(args.get("code_len"))} feedback={entry[1]}/></li></>
+                    <><li key={index}><GuessEntry is_brk={youAreBreaker()} curr_guess={currGuess} guess={entry[0]} guess_len={Number(args.get("code_len"))} feedback={entry[1]}/></li></>
                 ))}
                 </ul>
                 </>

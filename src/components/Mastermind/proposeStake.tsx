@@ -33,9 +33,7 @@ const ProposeStake: React.FC<delegateCall> = ({contract, callback, args}:delegat
         contract?.off('StakeFailed');
       }
     });
-  }
-
-  );
+  });
 
   const handleProposeStake = async (event: React.FormEvent) => {
     event.preventDefault();
