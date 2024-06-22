@@ -5,13 +5,21 @@ import {ethers} from 'ethers';
 import ProposeStake from "./proposeStake";
 import SetCodeHash from "./SetCodeHash";
 
-type gameState = "stake" | "setcode" | "guess" | "feedback" | "reveal" | "dispute";
+type gameState = "stake" | "setcode" | "guess" | "feedback" | "reveal" | "dispute" | "opp_turn";
 
 const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
     const [state, setState] = useState<gameState>("stake");
     const [gamePrize, setPrize] = useState<string | null>(null);
     const [c_fb_g, setCfb] = useState<boolean | null>(null);
+    const [turn_num, setTurnNum] = useState<number>(1);
     const [salt, setSalt] = useState<string | null>(null);
+
+    const youAreBreaker = () => {
+        const players = 
+        (args.get("role") === "creator" && c_fb_g) ? 
+        [false, true] : [true,false];
+        return players[turn_num % 2];
+    }
 
     useLayoutEffect( () => {
         contract?.on('GameStart', (_game_id: string, c_fb: boolean) => {
@@ -21,9 +29,20 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
                     (args.get("role") === "creator" && c_fb === true) ||
                     (args.get("role") === "opponent" && c_fb === false)
                 ) {
-                    setState("guess");
+                    setState("opp_turn");
                 } else {
                     setState("setcode");
+                }
+            }
+          });
+
+        contract?.on('SecretSet', (_game_id: string, turn_num: number) => {
+            setTurnNum(turn_num);
+            if (_game_id === args.get("game_id")) {
+                if (youAreBreaker()) {
+                    setState("guess");
+                } else {
+                    setState("opp_turn");
                 }
             }
           });
@@ -91,6 +110,12 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
             { state === "feedback" &&
             <> 
                 <div>FEEDBACK {salt}</div>
+            </>
+            }
+            { state === "opp_turn" &&
+            <> 
+                <h2>Opponent is playing...</h2>
+                {state}
             </>
             }
         </div>
