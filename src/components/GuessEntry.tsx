@@ -24,13 +24,16 @@ const GuessEntry: React.FC<GuessEntry> = ({guess,guess_len, feedback, curr_guess
   };
 
   useLayoutEffect(() => {
-    setNumberArray(bytesToNumberArray(guess,guess_len*2));
-    const [_CC, _NC] = bytesToNumberArray(feedback, 2*2);
-    if( !Number.isNaN(_CC) && !Number.isNaN(_NC)) {
-        setCC(_CC);
-        setNC(_NC);
-    }
-  }, []);
+    setNumberArray(bytesToNumberArray(guess, guess_len * 2));
+  }, [guess, guess_len]);
+
+  useLayoutEffect(() => {
+    const [_CC, _NC] = bytesToNumberArray(feedback, 2 * 2);
+    setCC(_CC);
+    setNC(_NC);
+    console.log("CC", _CC);
+    console.log("NC", _NC);
+  }, [feedback]);
 
   function bytesToNumberArray(bytes: string, len: number): number[] {
 
@@ -50,13 +53,13 @@ const GuessEntry: React.FC<GuessEntry> = ({guess,guess_len, feedback, curr_guess
   return (
     <div>
       <h2>Guess {curr_guess.toString()}</h2>
-      <h3>Code</h3>
+      <h3>Code </h3>
       <ul>
         {numberArray.map((num, index) => (
           <li key={index}>{num}</li>
         ))}
       </ul>
-    { CC && NC &&
+    {
     <>
       <h3>Feedback</h3>
       <div>
