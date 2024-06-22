@@ -42,6 +42,7 @@ const CodeInput: React.FC<CodeInputFormProps> = ({ maxValue, inputCount, callbac
             value={input}
             onChange={(event) => handleChange(index, event)}
             max={maxValue}
+            min={0}
           />
         </div>
       ))}
