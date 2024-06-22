@@ -36,8 +36,8 @@ const GameCreator: React.FC = () => {
       }
     });
 
-    contract?.on('PlayersReady', (_game_id: string, _code_len: number, _code_symbols_amt: number, _bonus: number) => {
-      if (_game_id === gameId) {
+    contract?.on('PlayersReady', (_game_id: string, opp_address: ethers.AddressLike, _code_len: number, _code_symbols_amt: number, _bonus: number) => {
+      if (_game_id === gameId || address === opp_address) {
         setCodeLen(_code_len.toString());
         setSymAmt(_code_symbols_amt.toString());
         setBonus(_bonus.toString());
