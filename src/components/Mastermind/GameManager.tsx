@@ -4,6 +4,8 @@ import {ethers} from 'ethers';
 
 import ProposeStake from "./proposeStake";
 import SetCodeHash from "./SetCodeHash";
+import GuessEntry from '../GuessEntry';
+import GuessCode from './GuessCode';
 
 type gameState = "stake" | "setcode" | "guess" | "feedback" | "reveal" | "dispute" | "opp_turn";
 
@@ -13,12 +15,27 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
     const [c_fb_g, setCfb] = useState<boolean | null>(null);
     const [turn_num, setTurnNum] = useState<number>(1);
     const [salt, setSalt] = useState<string | null>(null);
+    const [code, setCode] = useState<number[] | null>(null);
+    const [guesses, addGuess] = useState<[string,string][]>([]);
+    const [currGuess, setCurrGuess] =  useState<number>(1);
 
     const youAreBreaker = () => {
         const players = 
         (c_fb_g) ? 
         ["opponent", "creator"] : ["creator","opponent"];
         return players[turn_num % 2] === args.get("role");
+    }
+
+    function bytesToNumberArray(bytes: string, len: number): number[] {
+        // Remove the '0x' prefix
+        const hexString = bytes.slice(2);
+        // Convert the hex string to an array of numbers
+        const numberArray: number[] = [];
+        for (let i = 0; i < len; i += 2) {
+          const byte = hexString.slice(i, i + 2);
+          numberArray.push(parseInt(byte, 16));
+        }
+        return numberArray;
     }
 
     useLayoutEffect( () => {
@@ -39,7 +56,6 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
 
         contract?.on('SecretSet', (_game_id: string, turn_num: number) => {
             if (_game_id === args.get("game_id")) {
-                console.log("AYY");
                 setTurnNum(turn_num);
                 if (youAreBreaker()) {
                     setState("guess");
@@ -48,20 +64,33 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
                 }
             }
           });
-    });
+
+        contract?.on('GuessSent', (_game_id: string, _turn_num: number, _guess_num: number, _guess: string) => {
+            if (_game_id === args.get("game_id")) {
+                setCurrGuess(_guess_num);
+                console.log(_guess_num);
+                guesses[_guess_num] =[_guess, "0x"];
+                if (youAreBreaker()) {
+                    setState("opp_turn");
+                } else {
+                    setState("feedback");
+                }
+            }
+          });
+    }, []);
 
     const stakeCallback = (stake: number) => {
         console.log(stake);
         setPrize(stake.toString());
     };
 
-    const setCodeCallback = (salt: string) => {
+    const setCodeCallback = (salt: string, code: string) => {
         setSalt(salt);
-        setState("feedback");
+        setCode(bytesToNumberArray(code,Number(args.get("code_len"))*2));
     };
 
-    const guessCallback = () => {
-
+    const guessCallback = (guess: string) => {
+        
     };
 
 
@@ -89,8 +118,24 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
         <>
         <div>
             {
-                gamePrize &&
+                gamePrize && <>
                 <h2>Game Prize ${gamePrize} </h2>
+                { code &&
+                    <>
+                    Current Code
+                    <ul>
+                        {code.map((number,index) => (
+                            <><li key={index}>{number}</li></>
+                        ))}
+                    </ul>
+                    </>
+                }
+                <ul>
+                {guesses.map((entry, index) => (
+                    <><li key={index}><GuessEntry curr_guess={currGuess} guess={entry[0]} guess_len={Number(args.get("code_len"))} feedback={entry[1]}/></li></>
+                ))}
+                </ul>
+                </>
             }
             { state === "stake" &&
             <>
@@ -106,7 +151,7 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
             }
             { state === "guess" &&
             <> 
-                <div>GUESS</div>
+                <GuessCode contract={contract} callback={guessCallback} args={args}/>
             </>
             }
             { state === "feedback" &&
