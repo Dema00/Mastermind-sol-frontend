@@ -16,15 +16,15 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
 
     const youAreBreaker = () => {
         const players = 
-        (args.get("role") === "creator" && c_fb_g) ? 
-        [false, true] : [true,false];
-        return players[turn_num % 2];
+        (c_fb_g) ? 
+        ["opponent", "creator"] : ["creator","opponent"];
+        return players[turn_num % 2] === args.get("role");
     }
 
     useLayoutEffect( () => {
         contract?.on('GameStart', (_game_id: string, c_fb: boolean) => {
-            setCfb(c_fb);
             if (_game_id === args.get("game_id")) {
+                setCfb(c_fb);
                 if (
                     (args.get("role") === "creator" && c_fb === true) ||
                     (args.get("role") === "opponent" && c_fb === false)
@@ -33,12 +33,14 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
                 } else {
                     setState("setcode");
                 }
+                contract?.off('GameStart');
             }
           });
 
         contract?.on('SecretSet', (_game_id: string, turn_num: number) => {
-            setTurnNum(turn_num);
             if (_game_id === args.get("game_id")) {
+                console.log("AYY");
+                setTurnNum(turn_num);
                 if (youAreBreaker()) {
                     setState("guess");
                 } else {
@@ -115,7 +117,9 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
             { state === "opp_turn" &&
             <> 
                 <h2>Opponent is playing...</h2>
-                {state}
+                {/* u brk:{String(youAreBreaker())}
+                ---cfb:{String(c_fb_g)}---
+                {args.get("role")} */}
             </>
             }
         </div>

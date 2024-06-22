@@ -29,6 +29,8 @@ const ProposeStake: React.FC<delegateCall> = ({contract, callback, args}:delegat
         setError(null);
 
         callback(stake);
+        contract?.off('StakeSent');
+        contract?.off('StakeFailed');
       }
     });
   }

@@ -30,8 +30,9 @@ const GameCreator: React.FC = () => {
       address = addr;
     })
     contract?.on('GameCreated', (_game_id: string, _game_creator: string) => {
-      if (_game_creator === address) {
+      if (_game_creator === address && (role === "creator")) {
         setGameId(_game_id);
+        contract?.off('GameCreated');
       }
     });
 
@@ -40,6 +41,7 @@ const GameCreator: React.FC = () => {
         setCodeLen(_code_len.toString());
         setSymAmt(_code_symbols_amt.toString());
         setBonus(_bonus.toString());
+        contract?.off('PlayersReady');
       }
     });
   })
