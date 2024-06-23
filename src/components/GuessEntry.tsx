@@ -50,33 +50,30 @@ const GuessEntry: React.FC<GuessEntry> = ({guess,guess_len, feedback, curr_guess
 
   return (
     <div>
-      <h2>Guess {curr_guess.toString()}</h2>
-      <h3>Code </h3>
-      <ul>
-        {numberArray.map((num, index) => (
-          <li key={index}>{num}</li>
-        ))}
-      </ul>
-    {
-    <>
-      <h3>Feedback</h3>
-      <div>
-        <label>
-          <span style={{ marginLeft: '10px' }}>CC: {CC}</span>
-        </label>
+      <div className='card-body'>
+        <div className='myDivInput'>
+          <h5>Guess {curr_guess.toString()}</h5>
+        </div>
+        <div style={{float: "left", marginRight: "2em"}}>
+          <h5>Code </h5>
+            {numberArray.map((num, index) => (
+              <a key={index}>{num} </a>
+            ))}
+        </div>
+        {
+        <>
+          <div style={{float: "left", marginRight: "2em"}}>
+            <h5>Feedback</h5>
+            <a>CC: {CC} NC: {NC}</a>
+          </div>
+        </>
+        }
+        { is_brk &&
+        <>
+            <button className="btn btn-primary" onClick={handleButtonClick}>Dispute</button>
+        </>
+        }
       </div>
-      <div>
-        <label>
-          <span style={{ marginLeft: '10px' }}>NC: {NC}</span>
-        </label>
-      </div>
-    </>
-    }
-    { is_brk &&
-    <>
-        <button onClick={handleButtonClick}>Dispute</button>
-    </>
-    }
     </div>
     
   );

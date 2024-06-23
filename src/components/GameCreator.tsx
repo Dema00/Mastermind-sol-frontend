@@ -87,71 +87,85 @@ const GameCreator: React.FC = () => {
   };
 
   return (
-    <div>
-      <h2>Mastermind</h2>
+    <div className='myDivInput'>
+      <h1>Mastermind</h1>
       {error && <p style={{ color: 'red' }}>{error}</p>}
       { !gameId &&
       <>
         <h1>Create Game</h1>
-        <form onSubmit={handleCreateGame}>
-          <div>
-            <label>Opponent Address:</label>
-            <input 
+        <form onSubmit={handleCreateGame} >
+          <div className="myDivInput">
+            <label className="form-label mt-4">Opponent Address:</label>
+            <input
+              className="form-control"
               type="text" 
               value={opponent}
               onChange={(e) => setOpponent(e.target.value)} 
               required 
             />
           </div>
-          <div>
-            <label>Code Length:</label>
+          <div className="myDivInput">
+            <label className="form-label mt-4">Code Length:</label>
             <input 
+              className="form-control"
               type="number" 
               value={codeLength}
               onChange={(e) => setCodeLength(Number(e.target.value))} 
               required 
             />
           </div>
-          <div>
-            <label>Code Symbols Amount:</label>
+          <div className="myDivInput">
+            <label className="form-label mt-4">Code Symbols Amount:</label>
             <input 
+              className="form-control"
               type="number" 
               value={codeSymbolsAmt}
               onChange={(e) => setCodeSymbolsAmt(Number(e.target.value))} 
               required 
             />
           </div>
-          <div>
-            <label>Bonus:</label>
+          <div className="myDivInput">
+            <label className="form-label mt-4">Bonus:</label>
             <input 
+              className="form-control"
               type="text" 
               value={bonus}
               onChange={(e) => setBonus(e.target.value)} 
               required 
             />
           </div>
-          <button type="submit">Create Game</button>
+          <div className="d-grid gap-2 myDivBtn">
+            <button className="btn btn-lg btn-primary" type="submit">Create Game</button>
+          </div>
         </form>
         <h1>Join Game</h1>
           <form onSubmit={handleJoinGame}>
-          <div>
-            <label>Game ID:</label>
+          <div className="myDivInput">
+            <label className="form-label mt-4">Game ID:</label>
             <input
+              className="form-control"
               type="text"
               value={joinGameId}
               onChange={(e) => setJoinGameId(e.target.value)}
               required
             />
           </div>
-          <button type="submit">Join Game</button>
+          <div className="d-grid gap-2 myDivBtn">
+          <button className="btn btn-lg btn-primary" type="submit">Join Game</button>
+          </div>
           </form>
       </>
       }
       {gameId && codeLen && codeSymAmt &&
       <>
-        <h3>You are the {role}</h3>
-        <h4>In game with ID: {gameId}</h4>
-        { codeLen && <h5>Code length: {codeLen} Colors amount: {codeSymAmt} Bonus: {bonus}</h5>}
+        <div className='card text-white bg-primary mb-3' >
+          <div className='card-body'>
+            <h5>You are the {role}</h5>
+            <h5>In game with ID</h5>
+            <h6>{gameId}</h6>
+            { codeLen && <h5>Code length: {codeLen} Colors amount: {codeSymAmt} Bonus: {bonus}</h5>}
+          </div>
+        </div>
         <GameManager contract={contract!} callback={()=>{}} args={new Map<string,string>([
           ["game_id", gameId], ["role", role], ["state", "stake"], ["code_len", codeLen], ["code_sym_amt", codeSymAmt], ["bonus", bonus],
           ["address", selfAddr.toString()]
@@ -160,8 +174,13 @@ const GameCreator: React.FC = () => {
       }
       {gameId && !codeLen && !codeSymAmt &&
       <>
-        <h4>Room ID: {gameId}</h4>
-        <h4>Waiting for opponent...</h4>
+        <div className='card text-white bg-primary mb-3' >
+          <div className='card-body'>
+            <h5>Game ID</h5>
+            <h6>{gameId}</h6>
+            <h3>Waiting for opponent...</h3>
+          </div>
+        </div>
       </>
       }
     </div>

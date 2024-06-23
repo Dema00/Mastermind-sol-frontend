@@ -118,14 +118,20 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
                 const t_num: number = Number(_turn_num);
                 
                 if (youAreBreaker(t_num)) {
-                    setOppScore(oppScore + (guess_array.length-1));
-                    if(guess_array.length == 10 && guess_array[10].feedback != "0x0000") {
+                    setOppScore(oppScore + (guess_array.length-2));
+                    if(guess_array[t_num].feedback != "0x0400") {
+                        setOppScore(oppScore + 1);
+                    }
+                    if(guess_array.length == 10 && guess_array[10].feedback != "0x0400") {
                         setOppScore(oppScore + parseInt(args.get("bonus")!));
                     }
                     setState("dispute");
                 } else {
-                    setMyScore(myScore + (guess_array.length-1));
-                    if(guess_array.length == 10 && guess_array[10].feedback != "0x0000") {
+                    setMyScore(myScore + (guess_array.length-2));
+                    if(guess_array[t_num].feedback != "0x0400") {
+                        setMyScore(oppScore + 1);
+                    }
+                    if(guess_array.length == 10 && guess_array[10].feedback != "0x0400") {
                         setMyScore(myScore + parseInt(args.get("bonus")!));
                     }
                     setState("opp_turn");
@@ -253,25 +259,35 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
 
     return(
         <>
-        <div>
+        <div className='myDivInput'>
             {
                 gamePrize && <>
-                <h2>Game Prize ${gamePrize} </h2>
-                <h3>You: {myScore} Opp: {oppScore}</h3>
-                <h3>Turn {turn_num}</h3>
-                { code &&
+                <div className="card text-white bg-info mb-3" >
+                    <div className='card-body'>
+                        <h3 className='title'>Match Status</h3>
+                        <h5>Game Prize</h5>
+                        <h6>{gamePrize} GWEI</h6>
+                        <h5>You: {myScore} Opp: {oppScore}</h5>
+                        <h5>Turn {turn_num}</h5>
+                    </div>
+                </div>
+                { code!.length != 0 && code &&
                     <>
-                    Current Code
-                    <ul>
-                        {code.map((number,index) => (
-                            <li key={index}>{number}</li>
-                        ))}
-                    </ul>
+                    <div className='card text-white bg-warning mb-3'>
+                        <div className='card-body'>
+                            <h3>Turn Code</h3>
+                            <h3>
+                                {code.map((number,index) => (
+                                    <a key={index}>{number} </a>
+                                ))}
+                            </h3>
+                        </div>
+                    </div>
                     </>
                 }
                 <ul>
                 {guess_array.slice(1).map((entry, index) => (
-                    <li key={index}>
+                    <li style={{float: "left"}} key={index}>
                         <GuessEntry 
                         callback={disputeCallback}
                         is_brk={youAreBreaker()} 
@@ -281,6 +297,7 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
                         feedback={entry.feedback}/></li>
                 ))}
                 </ul>
+                <div style={{clear: "both"}}></div>
                 </>
             }
             { state === "stake" &&
@@ -309,7 +326,9 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
             <> 
                 {!youAreBreaker() &&
                 <>
-                    <button onClick={revealCodeCallback}>Reveal</button>
+                    <div className="d-grid gap-2 myDivBtn">
+                        <button className="btn btn-lg btn-primary" onClick={revealCodeCallback}>Reveal</button>
+                    </div>
                 </>
                 }
                 {youAreBreaker() &&
@@ -322,9 +341,11 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
             { state === "opp_turn" &&
             <> 
                 <h2>Opponent is playing...</h2>
-                <button onClick={accuseAFKCallback}>Accuse AFK</button>
-                Once AFK timer is over you can claim reward
-                <button onClick={claimRewardCallback}>Claim Reward</button>
+                <h5>
+                <button className="btn btn-outline-danger" onClick={accuseAFKCallback}>Accuse AFK</button>
+                <a>  and wait until you can  </a>
+                <button className="btn btn-outline-success" onClick={claimRewardCallback}>Claim Reward</button>
+                </h5>
             </>
             }
             { state === "game_over" &&
@@ -358,7 +379,9 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
             { state === "dispute" &&
             <> 
                 <h2>Dispute or set the next secret</h2>
-                <button onClick={setNextSecret}>Set secret</button>
+                <div className="d-grid gap-2 myDivBtn">
+                    <button className="btn btn-lg btn-primary" onClick={setNextSecret}>Set secret</button>
+                </div>
             </>
             }
             {error && <p style={{ color: 'red' }}>{error}</p>}

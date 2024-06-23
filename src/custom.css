@@ -1,0 +1,44 @@
+li {
+    list-style-type: none;
+    display: block;
+    float: left;
+    margin: 10px;
+}
+
+ul {
+    list-style-type: none;
+    clear: both;
+    text-align: center;
+}
+
+.myDivBtn{
+    padding: 25px 25px 25px 25px;
+    text-align: center;
+    align-content: center;
+    clear: both;
+}
+
+.myDivInput{
+    padding-left: 25px;
+    padding-right: 25px;
+    text-align: center;
+    clear: both;
+    align-items: center;
+    align-content: center;
+}
+
+.myDivInputCode{
+    max-width: 150px;
+    padding-bottom: 50px;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}

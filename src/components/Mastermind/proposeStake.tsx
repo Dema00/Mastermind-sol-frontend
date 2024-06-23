@@ -56,16 +56,19 @@ const ProposeStake: React.FC<delegateCall> = ({contract, callback, args}:delegat
     <div>
       <h2>Propose a Stake</h2>
       <form onSubmit={handleProposeStake}>
-        <div>
-          <label>Stake Amount (ETH):</label>
+        <div className="myDivInput">
+          <label className="form-label mt-4">Stake Amount (ETH):</label>
           <input
+            className="form-control"
             type="text"
             value={stakeAmount}
             onChange={(e) => setStakeAmount(e.target.value)}
             required
           />
         </div>
-        <button type="submit">Propose Stake</button>
+        <div className="d-grid gap-2 myDivBtn">
+        <button className="btn btn-lg btn-primary" type="submit">Propose Stake</button>
+        </div>
       </form>
       {error && <p style={{ color: 'red' }}>{error}</p>}
       {success && <p style={{ color: 'green' }}>{success}</p>}

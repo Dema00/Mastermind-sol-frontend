@@ -35,9 +35,12 @@ const CodeInput: React.FC<CodeInputFormProps> = ({ maxValue, inputCount, callbac
 
   return (
     <form onSubmit={handleSubmit}>
+      <ul>
       {inputs.map((input, index) => (
-        <div key={index}>
+        <li>
+        <div className="myDivInputCode myDivInput" key={index}>
           <input
+            className="form-control"
             type="number"
             value={input}
             onChange={(event) => handleChange(index, event)}
@@ -45,8 +48,12 @@ const CodeInput: React.FC<CodeInputFormProps> = ({ maxValue, inputCount, callbac
             min={0}
           />
         </div>
+        </li>
       ))}
-      <button type="submit">Submit</button>
+      </ul>
+      <div className="d-grid gap-2 myDivBtn">
+        <button className="btn btn-lg btn-primary" type="submit">Submit</button>
+      </div>
     </form>
   );
 };
