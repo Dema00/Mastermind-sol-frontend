@@ -24,7 +24,7 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
     const [gamePrize, setPrize] = useState<string | null>(null);
     const [turn_num, setTurnNum] = useState<number>(1);
     const [salt, setSalt] = useState<string | null>(null);
-    const [code, setCode] = useState<number[] | null>(null);
+    const [code, setCode] = useState<number[]>([]);
     const [codestr, setCodeStr] = useState<string| null>(null);
     const [guess_array, setGuessArray] = useState<guessStruct[]>([]);
     const [currGuess, setCurrGuess] =  useState<number>(1);
@@ -342,9 +342,9 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
             <> 
                 <h2>Opponent is playing...</h2>
                 <h5>
-                <button className="btn btn-outline-danger" onClick={accuseAFKCallback}>Accuse AFK</button>
-                <a>  and wait until you can  </a>
-                <button className="btn btn-outline-success" onClick={claimRewardCallback}>Claim Reward</button>
+                <button className="btn btn-outline-danger" onClick={accuseAFKCallback}>Accuse</button>
+                <a> him of being AFK and wait until you can claim the </a>
+                <button className="btn btn-outline-success" onClick={claimRewardCallback}>Reward</button>
                 </h5>
             </>
             }

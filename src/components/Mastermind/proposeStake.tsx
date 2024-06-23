@@ -8,7 +8,12 @@ const ProposeStake: React.FC<delegateCall> = ({contract, callback, args}:delegat
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
+  let setOnce:boolean = false;
+
   useLayoutEffect( () => {
+    if (setOnce) {
+      return;
+    }
     contract?.on('StakeSent', (_game_id: string, stake: number) => {
       if (_game_id === args.get("game_id")) {
         setSuccess(`creator staked: ${stake}`);
@@ -33,7 +38,8 @@ const ProposeStake: React.FC<delegateCall> = ({contract, callback, args}:delegat
         contract?.off('StakeFailed');
       }
     });
-  });
+    setOnce = true;
+  },[]);
 
   const handleProposeStake = async (event: React.FormEvent) => {
     event.preventDefault();
