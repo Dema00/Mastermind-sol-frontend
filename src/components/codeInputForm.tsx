@@ -52,7 +52,7 @@ const CodeInput: React.FC<CodeInputFormProps> = ({ maxValue, inputCount, callbac
       ))}
       </ul>
       <div className="d-grid gap-2 myDivBtn">
-        <button className="btn btn-lg btn-primary" type="submit">Submit</button>
+        <button className="btn btn-lg btn-outline-primary" type="submit">Submit</button>
       </div>
     </form>
   );

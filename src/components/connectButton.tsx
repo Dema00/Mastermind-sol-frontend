@@ -6,13 +6,11 @@ const ConnectButton: React.FC = () => {
   const { account, error, connect } = useMetaMask();
 
   return (
-    <div>
-      {!account ? (
-        <button onClick={connect}>Connect to MetaMask</button>
-      ) : (
-        <span>Connected with {account}</span>
-      )}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+    <div className='card border-primary mb-3 myDivInput' style={{marginLeft: "10%", marginRight: "10%", marginTop: "1em"}}>
+        <div className='card-body'>
+        <h3>Logged in as:</h3>
+        <h3>{account}</h3>
+        </div>
     </div>
   );
 };

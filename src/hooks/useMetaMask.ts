@@ -12,6 +12,7 @@ const useMetaMask = () => {
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
         setAccount(accounts[0]);
         setError(null); // Clear any previous errors
+        console.log("Acct set");
       } catch (err: any) {
         if (err.code === -32002) {
           setError('MetaMask is already processing a request. Please check your MetaMask extension.');
@@ -25,7 +26,8 @@ const useMetaMask = () => {
   };
 
   useEffect(() => {
-    if (window.ethereum) {
+    connect();
+    if (account && window.ethereum) {
       window.ethereum.on('accountsChanged', (accounts: string[]) => {
         setAccount(accounts[0]);
       });

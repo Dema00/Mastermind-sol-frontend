@@ -13,7 +13,6 @@ import './custom.css'
 const App: React.FC = () => {
   return (
     <div>
-      <h1>MetaMask Wallet Integration</h1>
       <ConnectButton />
       <GameCreator />
     </div>

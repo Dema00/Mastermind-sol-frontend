@@ -92,7 +92,7 @@ const GameCreator: React.FC = () => {
       {error && <p style={{ color: 'red' }}>{error}</p>}
       { !gameId &&
       <>
-        <h1>Create Game</h1>
+        <h2>Create Game</h2>
         <form onSubmit={handleCreateGame} >
           <div className="myDivInput">
             <label className="form-label mt-4">Opponent Address:</label>
@@ -135,7 +135,7 @@ const GameCreator: React.FC = () => {
             />
           </div>
           <div className="d-grid gap-2 myDivBtn">
-            <button className="btn btn-lg btn-primary" type="submit">Create Game</button>
+            <button className="btn btn-lg btn-outline-primary" type="submit">Create Game</button>
           </div>
         </form>
         <h1>Join Game</h1>
@@ -151,7 +151,7 @@ const GameCreator: React.FC = () => {
             />
           </div>
           <div className="d-grid gap-2 myDivBtn">
-          <button className="btn btn-lg btn-primary" type="submit">Join Game</button>
+          <button className="btn btn-lg btn-outline-primary" type="submit">Join Game</button>
           </div>
           </form>
       </>

@@ -83,59 +83,19 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
 
         contract?.on('SecretSet', (_game_id: string, _turn_num: bigint) => {
             if (_game_id === args.get("game_id")) {
-                setGuessArray([]);
-
-                const t_num: number = Number(_turn_num);
-                setTurnNum(t_num);
-                if (youAreBreaker(t_num)) {
-                    setCode([]);
-                    setState("guess");
-                } else {
-                    setState("opp_turn");
-                }
-                console.log("SecretSet");
+                secretSet(_game_id, _turn_num);
             }
           });
 
-        contract?.on('GuessSent', (_game_id: string, _turn_num: number, _guess_num: number, _guess: string) => {
+        contract?.on('GuessSent', (_game_id: string, _turn_num: number, _guess_num: bigint, _guess: string) => {
             if (_game_id === args.get("game_id")) {
-                setCurrGuess(_guess_num);
-                guess_array[_guess_num] ={turn:_guess_num,guess:_guess, feedback:"0x"};
-                setGuessArray(guess_array);
-                const t_num: number = Number(_turn_num);
-                if (youAreBreaker(t_num)) {
-                    setState("opp_turn");
-                } else {
-                    setState("feedback");
-                }
-                console.log("GuessSent");
+                guessSent(_game_id, _turn_num, _guess_num, _guess);
             }
           });
 
-        contract?.on('TurnOver', (_game_id: string, _turn_num: number, _code_sol: string) => {
+        contract?.on('TurnOver', (_game_id: string, _turn_num: bigint, _code_sol: string) => {
             if (_game_id === args.get("game_id")) {
-                setCode(bytesToNumberArray(_code_sol,Number(args.get("code_len"))*2));
-                const t_num: number = Number(_turn_num);
-                
-                if (youAreBreaker(t_num)) {
-                    setOppScore(oppScore + (guess_array.length-2));
-                    if(guess_array[t_num].feedback != "0x0400") {
-                        setOppScore(oppScore + 1);
-                    }
-                    if(guess_array.length == 10 && guess_array[10].feedback != "0x0400") {
-                        setOppScore(oppScore + parseInt(args.get("bonus")!));
-                    }
-                    setState("dispute");
-                } else {
-                    setMyScore(myScore + (guess_array.length-2));
-                    if(guess_array[t_num].feedback != "0x0400") {
-                        setMyScore(oppScore + 1);
-                    }
-                    if(guess_array.length == 10 && guess_array[10].feedback != "0x0400") {
-                        setMyScore(myScore + parseInt(args.get("bonus")!));
-                    }
-                    setState("opp_turn");
-                }
+                turnOver(_game_id, _turn_num, _code_sol);
             }
           });
 
@@ -164,26 +124,84 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
           });
 
 
-        contract?.on('FeedbackSent', (_game_id: string, _turn_num: number, _feedback: string) => {
+        contract?.on('FeedbackSent', (_game_id: string, _turn_num: bigint, _feedback: string) => {
             if (_game_id === args.get("game_id")) {
-                guess_array[Number(guess_array.length-1)].feedback = _feedback.toString();
-                setGuessArray(guess_array);
-                const t_num: number = Number(_turn_num);
-                if (youAreBreaker(t_num)) {
-                    setState("guess");
-                } else {
-                    setState("opp_turn");
-                }
-                console.log("FeedbackSent");
-                const fdbk = bytesToNumberArray(_feedback,2*2);
-                if(currGuess == 10 || fdbk[0] == parseInt(args.get("code_len")!)) {
-                    setState("reveal");
-                }
+                feedbackSent(_game_id, _turn_num, _feedback);
             }
           });
 
         setOnce = true;
     }, []);
+
+    const secretSet = (_game_id: string, _turn_num: bigint) => {
+        setGuessArray([]);
+
+        const t_num: number = Number(_turn_num);
+        setTurnNum(t_num);
+        if (youAreBreaker(t_num)) {
+            setCode([]);
+            setState("guess");
+        } else {
+            setState("opp_turn");
+        }
+        console.log("SecretSet");
+    };
+
+    const guessSent = (_game_id: string, _turn_num: number, _guess_num: bigint, _guess: string) => {
+        setCurrGuess(Number(_guess_num));
+        const g_num = Number(_guess_num);
+        guess_array[g_num] ={turn:g_num,guess:_guess, feedback:"0x"};
+        setGuessArray(guess_array);
+        const t_num: number = Number(_turn_num);
+        if (youAreBreaker(t_num)) {
+            setState("opp_turn");
+        } else {
+            setState("feedback");
+        }
+        console.log("GuessSent");
+    };
+
+    const turnOver = (_game_id: string, _turn_num: bigint, _code_sol: string) => {
+        setCode(bytesToNumberArray(_code_sol,Number(args.get("code_len"))*2));
+        const t_num: number = Number(_turn_num);
+        const fdbk = bytesToNumberArray(guess_array[t_num].feedback, 2*2);
+        const c_len = parseInt(args.get("code_len")!);
+        if (youAreBreaker(t_num)) {
+            setOppScore(oppScore + (guess_array.length-2));
+            if(fdbk[0] != c_len) {
+                setOppScore(oppScore + 1);
+            }
+            if(t_num == 10 && fdbk[0] != c_len) {
+                setOppScore(oppScore + parseInt(args.get("bonus")!));
+            }
+            setState("dispute");
+        } else {
+            setMyScore(myScore + (guess_array.length-2));
+            if(fdbk[0] != c_len) {
+                setMyScore(oppScore + 1);
+            }
+            if(t_num == 10 && fdbk[0] != c_len) {
+                setMyScore(myScore + parseInt(args.get("bonus")!));
+            }
+            setState("opp_turn");
+        }
+    };
+
+    const feedbackSent = (_game_id: string, _turn_num: bigint, _feedback: string) => {
+        guess_array[Number(guess_array.length-1)].feedback = _feedback.toString();
+        setGuessArray(guess_array);
+        const t_num: number = Number(_turn_num);
+        if (youAreBreaker(t_num)) {
+            setState("guess");
+        } else {
+            setState("opp_turn");
+        }
+        console.log("FeedbackSent");
+        const fdbk = bytesToNumberArray(_feedback,2*2);
+        if(currGuess == 10 || fdbk[0] == parseInt(args.get("code_len")!)) {
+            setState("reveal");
+        }
+    };
 
     const stakeCallback = (stake: number) => {
         setPrize(stake.toString());
@@ -231,6 +249,8 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
         } else {
             setState("opp_turn");
         }
+
+        setCode([]);
 
         const next_turn: number = turn_num + 1;
         console.log("next turn", next_turn);
@@ -327,7 +347,7 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
                 {!youAreBreaker() &&
                 <>
                     <div className="d-grid gap-2 myDivBtn">
-                        <button className="btn btn-lg btn-primary" onClick={revealCodeCallback}>Reveal</button>
+                        <button className="btn btn-lg btn-outline-primary" onClick={revealCodeCallback}>Reveal</button>
                     </div>
                 </>
                 }
@@ -353,8 +373,10 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
                 <h2>Winner {winner}</h2>
                 { winner==args.get("address") &&
                     <>
-                        <p>claim reward once claimable</p>
-                        <button onClick={claimRewardCallback}>Claim Reward</button>
+                        <h5>claim reward once claimable</h5>
+                        <div className="d-grid gap-2 myDivBtn">
+                        <button className="btn btn-lg btn-outline-success"  onClick={claimRewardCallback}>Claim Reward</button>
+                        </div>
                     </>
                 }
                 { winner!=args.get("address") &&
@@ -372,15 +394,19 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
             }
             { state === "game_completed" &&
             <> 
-                <h2>Winner {winner}</h2>
-                <p>The game is over</p>
+                <div className='card text-white bg-success mb-3'>
+                    <div className='card-body'>
+                        <h2>Winner {winner}</h2>
+                        <p>The game is over</p>
+                    </div>
+                </div>
             </>
             }
             { state === "dispute" &&
             <> 
                 <h2>Dispute or set the next secret</h2>
                 <div className="d-grid gap-2 myDivBtn">
-                    <button className="btn btn-lg btn-primary" onClick={setNextSecret}>Set secret</button>
+                    <button className="btn btn-lg btn-outline-primary" onClick={setNextSecret}>Set secret</button>
                 </div>
             </>
             }
