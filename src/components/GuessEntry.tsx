@@ -6,10 +6,11 @@ interface GuessEntry{
     guess: string,
     guess_len: number,
     feedback: string,
-    is_brk: boolean
+    is_brk: boolean,
+    callback: Function,
 }
 
-const GuessEntry: React.FC<GuessEntry> = ({guess,guess_len, feedback, curr_guess, is_brk}) => {
+const GuessEntry: React.FC<GuessEntry> = ({guess,guess_len, feedback, curr_guess, is_brk, callback}) => {
   // State for the array of numbers
   const [numberArray, setNumberArray] = useState<number[]>([]);
   // State for the two individual numbers
@@ -18,9 +19,8 @@ const GuessEntry: React.FC<GuessEntry> = ({guess,guess_len, feedback, curr_guess
  
   // Handle button click
   const handleButtonClick = () => {
-    console.log('Array:', numberArray);
-    console.log('Number 1:', CC);
-    console.log('Number 2:', NC);
+    callback(guess);
+    console.log("DISPUTED")
   };
 
   useLayoutEffect(() => {
@@ -31,8 +31,6 @@ const GuessEntry: React.FC<GuessEntry> = ({guess,guess_len, feedback, curr_guess
     const [_CC, _NC] = bytesToNumberArray(feedback, 2 * 2);
     setCC(_CC);
     setNC(_NC);
-    console.log("CC", _CC);
-    console.log("NC", _NC);
   }, [feedback]);
 
   function bytesToNumberArray(bytes: string, len: number): number[] {

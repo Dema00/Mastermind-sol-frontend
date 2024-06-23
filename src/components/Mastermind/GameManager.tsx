@@ -8,7 +8,7 @@ import GuessEntry from '../GuessEntry';
 import GuessCode from './GuessCode';
 import GiveFeedback from './GiveFeedback';
 
-type gameState = "stake" | "setcode" | "guess" | "feedback" | "reveal" | "dispute" | "opp_turn";
+type gameState = "stake" | "setcode" | "guess" | "feedback" | "reveal" | "dispute" | "opp_turn" | "game_over" | "game_completed";
 
 interface guessStruct {
     turn: number,
@@ -17,21 +17,28 @@ interface guessStruct {
 }
 
 const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
+    const [error, setError] = useState<string | null>(null);
+
+
     const [state, setState] = useState<gameState>("stake");
     const [gamePrize, setPrize] = useState<string | null>(null);
     const [turn_num, setTurnNum] = useState<number>(1);
     const [salt, setSalt] = useState<string | null>(null);
     const [code, setCode] = useState<number[] | null>(null);
+    const [codestr, setCodeStr] = useState<string| null>(null);
     const [guess_array, setGuessArray] = useState<guessStruct[]>([]);
     const [currGuess, setCurrGuess] =  useState<number>(1);
+    const [myScore, setMyScore] = useState<number>(0);
+    const [oppScore, setOppScore] = useState<number>(0);
+    const [winner, setWinner] = useState<string | null>(null);
     var setOnce: boolean = false;
 
     var c_fb_gg: boolean;
 
-    const youAreBreaker = () => {
-        let turnNum = Number(turn_num);
+    const youAreBreaker = (t_n = turn_num) => {
+        let turnNum = Number(t_n);
         if (isNaN(turnNum)) {
-            console.error('turn_num is not a valid number:', turn_num);
+            console.error('turn_num is not a valid number:', t_n);
             return false; // Handle error case as appropriate
         }
 
@@ -39,14 +46,6 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
         const players = (c_fb_gg) ? ["opponent", "creator"] : ["creator", "opponent"];
         const playerIndex: number = turnNum % 2;
         const currentRole = args.get("role");
-
-        /* console.log("-------------------------------------------");
-        console.log('c_fb:', c_fb_gg, 'type:', typeof c_fb_gg);
-        console.log('turn_num:', turn_num, 'type:', typeof turn_num);
-        console.log('currentRole:', currentRole, 'type:', typeof currentRole);
-        console.log('currentStatus:', players[playerIndex], 'type:', typeof players[playerIndex]);
-        console.log('return', players[playerIndex] == currentRole, 'type:', typeof (players[playerIndex] == currentRole)); */
-
         return (players[playerIndex] == currentRole);
     }
 
@@ -82,10 +81,14 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
             }
           });
 
-        contract?.on('SecretSet', (_game_id: string, turn_num: number) => {
+        contract?.on('SecretSet', (_game_id: string, _turn_num: bigint) => {
             if (_game_id === args.get("game_id")) {
-                setTurnNum(turn_num);
-                if (youAreBreaker()) {
+                setGuessArray([]);
+
+                const t_num: number = Number(_turn_num);
+                setTurnNum(t_num);
+                if (youAreBreaker(t_num)) {
+                    setCode([]);
                     setState("guess");
                 } else {
                     setState("opp_turn");
@@ -98,7 +101,9 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
             if (_game_id === args.get("game_id")) {
                 setCurrGuess(_guess_num);
                 guess_array[_guess_num] ={turn:_guess_num,guess:_guess, feedback:"0x"};
-                if (youAreBreaker()) {
+                setGuessArray(guess_array);
+                const t_num: number = Number(_turn_num);
+                if (youAreBreaker(t_num)) {
                     setState("opp_turn");
                 } else {
                     setState("feedback");
@@ -107,22 +112,67 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
             }
           });
 
+        contract?.on('TurnOver', (_game_id: string, _turn_num: number, _code_sol: string) => {
+            if (_game_id === args.get("game_id")) {
+                setCode(bytesToNumberArray(_code_sol,Number(args.get("code_len"))*2));
+                const t_num: number = Number(_turn_num);
+                
+                if (youAreBreaker(t_num)) {
+                    setOppScore(oppScore + (guess_array.length-1));
+                    if(guess_array.length == 10 && guess_array[10].feedback != "0x0000") {
+                        setOppScore(oppScore + parseInt(args.get("bonus")!));
+                    }
+                    setState("dispute");
+                } else {
+                    setMyScore(myScore + (guess_array.length-1));
+                    if(guess_array.length == 10 && guess_array[10].feedback != "0x0000") {
+                        setMyScore(myScore + parseInt(args.get("bonus")!));
+                    }
+                    setState("opp_turn");
+                }
+            }
+          });
+
+        contract?.on('GameWinner', (_game_id: string, _winner: ethers.AddressLike) => {
+            if (_game_id === args.get("game_id")) {
+                setState("game_over");
+                console.log("gamewinner",winner?.toString(), typeof winner);
+                setWinner(_winner.toString());
+            }
+          });
+
+          contract?.on('RewardClaimed', (_game_id: string, _winner: ethers.AddressLike) => {
+            if (_game_id === args.get("game_id")) {
+                setState("game_completed");
+                console.log("rew claimed",winner, typeof winner);
+                setWinner(_winner.toString());
+            }
+          });
+
+        contract?.on('disputeWon', (_game_id: string, _winner: ethers.AddressLike) => {
+            if (_game_id === args.get("game_id")) {
+                setState("game_completed");
+                console.log("disp won",winner, typeof winner);
+                setWinner(_winner.toString());
+            }
+          });
+
+
         contract?.on('FeedbackSent', (_game_id: string, _turn_num: number, _feedback: string) => {
             if (_game_id === args.get("game_id")) {
-                console.log("currGuess",currGuess);
-                console.log("currCode",guess_array[currGuess].guess);
-                console.log("currFeeback",_feedback);
                 guess_array[Number(guess_array.length-1)].feedback = _feedback.toString();
-                console.log(guess_array);
                 setGuessArray(guess_array);
-                console.log("TADAA");
-                if (youAreBreaker()) {
+                const t_num: number = Number(_turn_num);
+                if (youAreBreaker(t_num)) {
                     setState("guess");
                 } else {
                     setState("opp_turn");
                 }
                 console.log("FeedbackSent");
-                console.log(_feedback);
+                const fdbk = bytesToNumberArray(_feedback,2*2);
+                if(currGuess == 10 || fdbk[0] == parseInt(args.get("code_len")!)) {
+                    setState("reveal");
+                }
             }
           });
 
@@ -130,13 +180,13 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
     }, []);
 
     const stakeCallback = (stake: number) => {
-        console.log(stake);
         setPrize(stake.toString());
     };
 
     const setCodeCallback = (salt: string, code: string) => {
         setSalt(salt);
         setCode(bytesToNumberArray(code,Number(args.get("code_len"))*2));
+        setCodeStr(code);
     };
 
     const guessCallback = (guess: string) => {
@@ -148,20 +198,57 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
 
     };
 
-    const revealCodeCallback = () => {
-
+    const revealCodeCallback = async () => {
+        try{
+            const tx = await contract.revealCode(args.get("game_id"), codestr, salt);
+            await tx.wait();
+        }
+        catch (error: any) {
+            setError(error.message);
+        }
     };
 
-    const claimRewardCallback = () => {
-        
+    const claimRewardCallback = async () => {
+        try {
+            const tx = await contract.claimReward(args.get("game_id"));
+            await tx.wait();
+        }
+        catch (error: any) {
+            setError(error.message);
+        }
     };
 
-    const disputeCallback = () => {
-        
+    const setNextSecret = () => {
+
+        if (youAreBreaker()) {
+            setState("setcode");
+        } else {
+            setState("opp_turn");
+        }
+
+        const next_turn: number = turn_num + 1;
+        console.log("next turn", next_turn);
+        setTurnNum(next_turn);
     };
 
-    const accuseAFKCallback = () => {
-        
+    const disputeCallback = async (guess: string) => {
+        try{
+            const tx = await contract.dispute(args.get("game_id")!, guess);
+            const receipt = await tx.wait();
+        }
+        catch (error: any) {
+            setError(error.message);
+        }
+    };
+
+    const accuseAFKCallback = async () => {
+        try{
+        const tx = await contract.accuseAFK(args.get("game_id")!);
+        const receipt = await tx.wait();
+        }
+        catch (error: any) {
+            setError(error.message);
+        }
     };
 
     return(
@@ -170,6 +257,8 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
             {
                 gamePrize && <>
                 <h2>Game Prize ${gamePrize} </h2>
+                <h3>You: {myScore} Opp: {oppScore}</h3>
+                <h3>Turn {turn_num}</h3>
                 { code &&
                     <>
                     Current Code
@@ -184,6 +273,7 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
                 {guess_array.slice(1).map((entry, index) => (
                     <li key={index}>
                         <GuessEntry 
+                        callback={disputeCallback}
                         is_brk={youAreBreaker()} 
                         curr_guess={entry.turn} 
                         guess={entry.guess} 
@@ -215,14 +305,60 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
                 <GiveFeedback contract={contract} callback={giveFeedbackCallback} args={args}/>
             </>
             }
+            { state === "reveal" &&
+            <> 
+                {!youAreBreaker() &&
+                <>
+                    <button onClick={revealCodeCallback}>Reveal</button>
+                </>
+                }
+                {youAreBreaker() &&
+                <>
+                    <h2>Waiting for reveal...</h2>
+                </>
+                }
+            </>
+            }
             { state === "opp_turn" &&
             <> 
                 <h2>Opponent is playing...</h2>
-                {/* u brk:{String(youAreBreaker())}
-                ---cfb:{String(c_fb_g)}---
-                {args.get("role")} */}
             </>
             }
+            { state === "game_over" &&
+            <> 
+                <h2>Winner {winner}</h2>
+                { winner==args.get("address") &&
+                    <>
+                        <p>claim reward once claimable</p>
+                        <button onClick={claimRewardCallback}>Claim Reward</button>
+                    </>
+                }
+                { winner!=args.get("address") &&
+                    <>
+                        <p>dispute or wait for reward to be claimed</p>
+                    </>
+                }
+                { winner === ethers.ZeroAddress &&
+                <>
+                    <p>TIE</p>
+                    <button onClick={claimRewardCallback}>Claim Reward</button>
+                </>
+                }
+            </>
+            }
+            { state === "game_completed" &&
+            <> 
+                <h2>Winner {winner}</h2>
+                <p>The game is over</p>
+            </>
+            }
+            { state === "dispute" &&
+            <> 
+                <h2>Dispute or set the next secret</h2>
+                <button onClick={setNextSecret}>Set secret</button>
+            </>
+            }
+            {error && <p style={{ color: 'red' }}>{error}</p>}
         </div>
         </>
     )

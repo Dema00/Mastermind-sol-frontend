@@ -24,10 +24,7 @@ const SetCodeHash: React.FC<delegateCall> = ({callback, args, contract}:delegate
           throw new Error('Invalid bytes4 value');
         }
         setSalt(_salt); 
-        console.log(code);
-        console.log(salt);
         const secret = ethers.solidityPackedKeccak256(["bytes16","bytes4"],[string_code,_salt]);
-        console.log("AAAA");
         try {
           if (!ethers.isHexString(secret, 32)) {
               throw new Error('Invalid bytes32 value');

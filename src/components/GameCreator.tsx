@@ -14,6 +14,7 @@ const GameCreator: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [gameId, setGameId] = useState<string | null>(null);
   const [role, setRole] = useState<string>('');
+  const [selfAddr, setAddr] = useState<ethers.AddressLike>('');
 
   const [joinGameId, setJoinGameId] = useState<string>('');
   const [opponent, setOpponent] = useState<string>('');
@@ -27,6 +28,7 @@ const GameCreator: React.FC = () => {
   useLayoutEffect(() => {
     let address: string;
     signer?.getAddress().then((addr) => {
+      setAddr(addr);
       address = addr;
     })
     contract?.on('GameCreated', (_game_id: string, _game_creator: string) => {
@@ -151,7 +153,8 @@ const GameCreator: React.FC = () => {
         <h4>In game with ID: {gameId}</h4>
         { codeLen && <h5>Code length: {codeLen} Colors amount: {codeSymAmt} Bonus: {bonus}</h5>}
         <GameManager contract={contract!} callback={()=>{}} args={new Map<string,string>([
-          ["game_id", gameId], ["role", role], ["state", "stake"], ["code_len", codeLen], ["code_sym_amt", codeSymAmt], ["bonus", bonus]
+          ["game_id", gameId], ["role", role], ["state", "stake"], ["code_len", codeLen], ["code_sym_amt", codeSymAmt], ["bonus", bonus],
+          ["address", selfAddr.toString()]
           ])}/>
       </>
       }

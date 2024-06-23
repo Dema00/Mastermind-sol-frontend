@@ -13,8 +13,6 @@ const GiveFeedback: React.FC<delegateCall> = ({callback, args, contract}:delegat
 
     const handleSetFeedback = async (input: Uint8Array) => {
         const feedback = "0x" + bytesToHex(input).padEnd(4,"0");
-        console.log("SENDING FEEDBACK");
-        console.log(feedback);
         if (!ethers.isHexString( feedback, 2)) {
             throw new Error('Invalid bytes2 value');
         }
