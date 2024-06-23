@@ -322,6 +322,9 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
             { state === "opp_turn" &&
             <> 
                 <h2>Opponent is playing...</h2>
+                <button onClick={accuseAFKCallback}>Accuse AFK</button>
+                Once AFK timer is over you can claim reward
+                <button onClick={claimRewardCallback}>Claim Reward</button>
             </>
             }
             { state === "game_over" &&
