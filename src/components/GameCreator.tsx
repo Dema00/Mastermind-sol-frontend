@@ -118,8 +118,8 @@ const GameCreator: React.FC = () => {
       { !gameId &&
       <>
         <h2>Create Game</h2>
-        <form onSubmit={handleCreateGame} >
-          <div className="myDivInput">
+        <form onSubmit={handleCreateGame} className='card border-primary mb-3'>
+          <div className="myDivInput ">
             <div style={{float: "left", minWidth: "75%"}}>
               <label className="form-label mt-4">Opponent Address:</label>
                 <input
@@ -176,7 +176,8 @@ const GameCreator: React.FC = () => {
           </div>
         </form>
         <h1>Join Game</h1>
-          <form onSubmit={handleJoinGame}>
+        <div className='card border-primary mb-3'>
+        <form onSubmit={handleJoinGame}>
           <div className="myDivInput">
             <label className="form-label mt-4">Game ID:</label>
             <input
@@ -196,6 +197,7 @@ const GameCreator: React.FC = () => {
           <div className="d-grid gap-2 myDivBtn">
             <button className="btn btn-lg btn-outline-primary" onClick={handleJoinRandomGame}>Join Random Game</button>
           </div>
+        </div>
         </div>
       </>
       }
