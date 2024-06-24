@@ -62,9 +62,6 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
     }
 
     useLayoutEffect( () => {
-        if (setOnce) {
-            return;
-        }
         contract?.once('GameStart', (_game_id: string, c_fb: boolean) => {
             if (_game_id === args.get("game_id")) {
                 c_fb_gg = c_fb;
@@ -129,9 +126,7 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
                 feedbackSent(_game_id, _turn_num, _feedback);
             }
           });
-
-        setOnce = true;
-    }, []);
+    }, [guess_array]);
 
     const secretSet = (_game_id: string, _turn_num: bigint) => {
         setGuessArray([]);
