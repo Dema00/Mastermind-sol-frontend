@@ -90,7 +90,6 @@ const GameCreator: React.FC = () => {
   };
 
   const handleJoinRandomGame = async () => {
-    console.log("AAA")
     if (contract) {
       try {
         const tx = await contract.joinGame("0x0000000000000000000000000000000000000000000000000000000000000000");

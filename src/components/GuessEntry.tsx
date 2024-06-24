@@ -20,7 +20,6 @@ const GuessEntry: React.FC<GuessEntry> = ({guess,guess_len, feedback, curr_guess
   // Handle button click
   const handleButtonClick = () => {
     callback(guess);
-    console.log("DISPUTED")
   };
 
   useLayoutEffect(() => {
