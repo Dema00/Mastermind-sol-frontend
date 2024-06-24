@@ -4,6 +4,7 @@ import Mastermind from './abi/Mastermind.json';
 
 import ConnectButton from './components/connectButton';
 import GameCreator from './components/GameCreator';
+import WithdrawButton from './components/withdraw';
 
 import 'bootstrap/dist/css/bootstrap.css';
 import './bootstrap.min.css'

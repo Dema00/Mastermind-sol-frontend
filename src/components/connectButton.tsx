@@ -1,6 +1,7 @@
 // src/components/ConnectButton.tsx
 import React from 'react';
 import useMetaMask from '../hooks/useMetaMask';
+import WithdrawButton from './withdraw';
 
 const ConnectButton: React.FC = () => {
   const { account, error, connect } = useMetaMask();
@@ -10,6 +11,7 @@ const ConnectButton: React.FC = () => {
         <div className='card-body'>
         <h3>Logged in as:</h3>
         <h3>{account}</h3>
+        < WithdrawButton/>
         </div>
     </div>
   );

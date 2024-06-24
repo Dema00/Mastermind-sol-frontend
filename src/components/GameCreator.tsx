@@ -21,9 +21,11 @@ const GameCreator: React.FC = () => {
   const [codeLength, setCodeLength] = useState<number>(4);
   const [codeSymbolsAmt, setCodeSymbolsAmt] = useState<number>(6);
   const [bonus, setBonus] = useState<string>('10');
+  const [useZeroAddress, setUseZeroAddress] = useState<boolean>(false);
 
   const [codeLen, setCodeLen] = useState<string | null>(null);
   const [codeSymAmt, setSymAmt] = useState<string | null>(null);
+  
 
   useLayoutEffect(() => {
     let address: string;
@@ -43,6 +45,7 @@ const GameCreator: React.FC = () => {
         setCodeLen(_code_len.toString());
         setSymAmt(_code_symbols_amt.toString());
         setBonus(_bonus.toString());
+        setGameId(_game_id);
         contract?.off('PlayersReady');
       }
     });
@@ -86,6 +89,28 @@ const GameCreator: React.FC = () => {
     }
   };
 
+  const handleJoinRandomGame = async () => {
+    console.log("AAA")
+    if (contract) {
+      try {
+        const tx = await contract.joinGame("0x0000000000000000000000000000000000000000000000000000000000000000");
+        await tx.wait();
+        setRole("opponent");
+      } catch (error: any) {
+        setError('Error joining game: ' + error.message);
+      }
+    }
+  }
+
+  const handleUseZeroAddressChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setUseZeroAddress(event.target.checked);
+    if (event.target.checked) {
+      setOpponent(ethers.ZeroAddress);
+    } else {
+      setOpponent('');
+    }
+  };
+
   return (
     <div className='myDivInput'>
       <h1>Mastermind</h1>
@@ -95,14 +120,26 @@ const GameCreator: React.FC = () => {
         <h2>Create Game</h2>
         <form onSubmit={handleCreateGame} >
           <div className="myDivInput">
-            <label className="form-label mt-4">Opponent Address:</label>
-            <input
-              className="form-control"
-              type="text" 
-              value={opponent}
-              onChange={(e) => setOpponent(e.target.value)} 
-              required 
-            />
+            <div style={{float: "left", minWidth: "75%"}}>
+              <label className="form-label mt-4">Opponent Address:</label>
+                <input
+                    className="form-control"
+                    type="text"
+                    value={opponent}
+                    onChange={(e) => setOpponent(e.target.value)}
+                    disabled={useZeroAddress}
+                    required={!useZeroAddress}
+                  />
+            </div>
+            <div className="form-check mt-4 d-flex flex-column align-items-center justify-content-center" style={{ height: '110px' }} >
+              <label className="form-check-label mb-2">Random Opponent</label>
+              <input
+                className="form-check-input"
+                type="checkbox"
+                checked={useZeroAddress}
+                onChange={handleUseZeroAddressChange}
+              />
+          </div>
           </div>
           <div className="myDivInput">
             <label className="form-label mt-4">Code Length:</label>
@@ -153,7 +190,13 @@ const GameCreator: React.FC = () => {
           <div className="d-grid gap-2 myDivBtn">
           <button className="btn btn-lg btn-outline-primary" type="submit">Join Game</button>
           </div>
-          </form>
+        </form>
+        <div>
+          <h4>Or</h4>
+          <div className="d-grid gap-2 myDivBtn">
+            <button className="btn btn-lg btn-outline-primary" onClick={handleJoinRandomGame}>Join Random Game</button>
+          </div>
+        </div>
       </>
       }
       {gameId && codeLen && codeSymAmt &&
