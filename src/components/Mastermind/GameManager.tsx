@@ -31,6 +31,7 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
     const [myScore, setMyScore] = useState<number>(0);
     const [oppScore, setOppScore] = useState<number>(0);
     const [winner, setWinner] = useState<string | null>(null);
+    const [c_fb_g, setCfb] = useState<boolean>(false);
     var setOnce: boolean = false;
 
     var c_fb_gg: boolean;
@@ -43,7 +44,7 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
         }
 
 
-        const players = (c_fb_gg) ? ["opponent", "creator"] : ["creator", "opponent"];
+        const players = (c_fb_g) ? ["opponent", "creator"] : ["creator", "opponent"];
         const playerIndex: number = turnNum % 2;
         const currentRole = args.get("role");
         return (players[playerIndex] == currentRole);
@@ -65,6 +66,7 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
         contract?.once('GameStart', (_game_id: string, c_fb: boolean) => {
             if (_game_id === args.get("game_id")) {
                 c_fb_gg = c_fb;
+                setCfb(c_fb);
                 if (
                     (args.get("role") === "creator" && c_fb === true) ||
                     (args.get("role") === "opponent" && c_fb === false)
@@ -126,7 +128,7 @@ const GameManager: React.FC<delegateCall> = ({args, contract}:delegateCall) => {
                 feedbackSent(_game_id, _turn_num, _feedback);
             }
           });
-    }, [guess_array]);
+    }, [guess_array, c_fb_g]);
 
     const secretSet = (_game_id: string, _turn_num: bigint) => {
         setGuessArray([]);
